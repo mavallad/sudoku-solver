@@ -106,7 +106,9 @@ impl Grid {
                     return false;
                 } else if let Some(unique_value) = opts.one_option() {
                     for neighbour in &NEIGHBOURS[&cell] {
-                        self.eliminate(*neighbour, unique_value);
+                        if !self.eliminate(*neighbour, unique_value) {
+                            return false;
+                        }
                     }
                 }
             }
