@@ -3,10 +3,10 @@ use crate::{DIGITS, CELLS, UNITS, NEIGHBOURS};
 use std::collections::HashMap;
 use std::collections::hash_map::Entry::Occupied;
 
-pub enum SudokuResult {
-    NoSolution,
-    Solvable
-}
+// pub enum SudokuResult {
+//     NoSolution,
+//     Solvable
+// }
 
 #[derive(Debug)]
 pub struct DigitOptions {
@@ -17,16 +17,16 @@ impl DigitOptions {
         DigitOptions { values : DIGITS.to_vec() }
     }
 
-    fn of_value(val: u8) -> DigitOptions {
-        DigitOptions { values : vec![val] }
-    }
-
     fn remove_option(&mut self, val: u8) {
         self.values.retain(|x| *x != val);
     }
 
     fn contains(&self, value: &u8) -> bool {
         self.values.contains(value)
+    }
+
+    fn other_than(&self, value: u8) -> Vec<u8> {
+        self.values.iter().filter(|v| **v != value).map(|v| *v).collect()
     }
 
     fn one_option(&self) -> Option<u8> {
@@ -57,10 +57,39 @@ impl Grid {
         }
     }
 
-    pub fn assign(&mut self, cell: Cell, value: u8) {
-        &self.cells_options.insert(cell, DigitOptions::of_value(value));
-        for neighbour in &NEIGHBOURS[&cell] {
-            self.eliminate(*neighbour, value);
+    pub fn assign(&mut self, cell: Cell, value: u8) -> bool {
+        let options_to_remove = self.cells_options[&cell].other_than(value);
+        for other_value in options_to_remove {
+            if !self.eliminate(cell, other_value) {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// Display these values as a 2-D grid.
+    pub fn paint(&self) {
+        let mut max_width = 0;
+        for c in &*CELLS {
+            let width = self.cells_options[c].values.len();
+            if width > max_width {
+                max_width = width;
+            }
+        }
+        max_width += 1;
+        let dashes = "-".repeat((max_width + 1) * 3);
+        let line = format!("{}+{}+{}", dashes, dashes, dashes);
+        for c in &*CELLS {
+            print!("{:?}", &self.cells_options[c].values);
+            if c.1 == 3 || c.1 == 6 {
+                print!("|");
+            }
+            if c.1 == 9 {
+                println!();
+                if c.0 == 'B' || c.0 == 'E' {
+                    println!("{}", line);
+                }
+            }
         }
     }
 
@@ -82,7 +111,19 @@ impl Grid {
                 }
             }
             for u in &*UNITS[&cell] {
-
+                let mut places_with_value: Vec<&Cell> = Vec::new();
+                for c in *u {
+                    if self.cells_options[c].contains(&value) {
+                        places_with_value.push(c);
+                    }
+                }
+                if places_with_value.len() == 0 {
+                    return false;
+                } else if places_with_value.len() == 1 {
+                    if !self.assign(*places_with_value[0], value) {
+                        return false;
+                    }
+                }
             }
         }
         true

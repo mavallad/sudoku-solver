@@ -3,7 +3,7 @@ use crate::solver::Grid;
 pub fn parse_grid(grid_str: &str) -> Grid {
     let mut grid = Grid::init();
     let mut count_cells = 0;
-    for (i, c) in grid_str.chars().enumerate() {
+    for c in grid_str.chars() {
         if c.is_digit(10) || c == '.' {
             if c != '0' && c != '.' {
                 let value = c.to_digit(10).unwrap();
@@ -11,7 +11,9 @@ pub fn parse_grid(grid_str: &str) -> Grid {
                     panic!("Number of cells passes 81");
                 }
                 let cell = crate::CELLS.get(count_cells).unwrap();
-                grid.assign(*cell, value as u8);
+                if !grid.assign(*cell, value as u8) {
+                    panic!("Unsolvable sudoku");
+                }
             }
             count_cells += 1;
         }

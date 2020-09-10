@@ -18,11 +18,11 @@ lazy_static! {
     static ref UNITSLIST: Vec<Vec<Cell>> = {
         let mut unitlist: Vec<Vec<Cell>> = Vec::new();
         for row in ROWS.iter() {
-            let mut unit = cross(&[*row], &COLS);
+            let unit = cross(&[*row], &COLS);
             unitlist.push(unit);
         }
         for col in COLS.iter() {
-            let mut unit = cross(&ROWS, &[*col]);
+            let unit = cross(&ROWS, &[*col]);
             unitlist.push(unit);
         }
         for block_chars in [['A', 'B', 'C'], ['D', 'E', 'F'], ['G', 'H', 'I']].iter() {
@@ -69,7 +69,7 @@ pub fn cross(row_slice: &[char], col_slice: &[u8]) -> Vec<Cell> {
 fn main() {
     if let Some(arg1) = env::args().nth(1) {
         let grid = parser::parse_grid(&arg1);
-        println!("Hello, world! {:?}", grid);
+        grid.paint();
     } else {
         panic!("Please, provide a grid");
     }
