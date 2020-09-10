@@ -8,7 +8,7 @@ use std::collections::hash_map::Entry::Occupied;
 //     Solvable
 // }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct DigitOptions {
     values: Vec<u8>
 }
@@ -42,7 +42,7 @@ impl DigitOptions {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Grid {
     cells_options: HashMap<Cell, DigitOptions>
 }
@@ -54,6 +54,33 @@ impl Grid {
         }
         Grid {
             cells_options
+        }
+    }
+
+    /// Using depth-first search and propagation, try all possible values.
+    pub fn search(self) -> Option<Grid> {
+        let mut cell_min_values_opt = None;
+        let mut min_values_len = 10;
+        for (cell, options) in &self.cells_options {
+            let options_len = options.values.len();
+            if options_len > 1 && options_len < min_values_len {
+                cell_min_values_opt = Some(cell);
+                min_values_len = options_len;
+            }
+        }
+        if let Some(cell_min_values) = cell_min_values_opt {
+            let options = &self.cells_options[cell_min_values];
+            for option in &options.values {
+                let mut cloned_grid = self.clone();
+                if cloned_grid.assign(*cell_min_values, *option) {
+                    if let Some(solution) = cloned_grid.search() {
+                        return Some(solution);
+                    }
+                }
+            }
+            None
+        } else {
+            Some(self)
         }
     }
 
@@ -86,7 +113,7 @@ impl Grid {
             }
             if c.1 == 9 {
                 println!();
-                if c.0 == 'B' || c.0 == 'E' {
+                if c.0 == 'C' || c.0 == 'F' {
                     println!("{}", line);
                 }
             }
@@ -129,19 +156,5 @@ impl Grid {
             }
         }
         true
-    }
-}
-
-fn solve() {
-
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn cross_test() {
-        assert_eq!(vec![('A', 1), ('A', 2)], crate::cross(&['A'], &[1, 2]));
     }
 }

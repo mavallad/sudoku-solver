@@ -12,7 +12,7 @@ pub fn parse_grid(grid_str: &str) -> Grid {
                 }
                 let cell = crate::CELLS.get(count_cells).unwrap();
                 if !grid.assign(*cell, value as u8) {
-                    panic!("Unsolvable sudoku");
+                    panic!("Unsolvable sudoku")
                 }
             }
             count_cells += 1;

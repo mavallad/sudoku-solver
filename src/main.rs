@@ -69,8 +69,22 @@ pub fn cross(row_slice: &[char], col_slice: &[u8]) -> Vec<Cell> {
 fn main() {
     if let Some(arg1) = env::args().nth(1) {
         let grid = parser::parse_grid(&arg1);
-        grid.paint();
+        let solution_opt = grid.search();
+        if let Some(solution) = solution_opt {
+            solution.paint();
+        } else {
+            panic!("No solution");
+        }
     } else {
         panic!("Please, provide a grid");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    #[test]
+    fn cross_test() {
+        assert_eq!(vec![('A', 1), ('A', 2)], crate::cross(&['A'], &[1, 2]));
     }
 }
